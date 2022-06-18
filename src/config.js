@@ -1,4 +1,4 @@
-export const CONTACT_ADDRESS = '0xe4023E14bF51B1D13a44e423d492ab119A5318d9'
+export const CONTACT_ADDRESS = '0x9368bd00A38b57E77077149694feC9c8d7173C66'
 
 export const CONTACT_ABI = [
 	{
@@ -99,6 +99,25 @@ export const CONTACT_ABI = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "userAdress",
+				"type": "address"
+			}
+		],
+		"name": "hasAccess",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
