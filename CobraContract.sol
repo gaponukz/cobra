@@ -3,8 +3,7 @@
 pragma solidity ^0.8.0;
 
 contract Pyramid {
-    uint256 currentGameIndex = 0;
-    uint256 currentUserIdIndex = 1;
+    uint256 currentUserIdIndex;
     address contractOwner;
 
     struct User {
@@ -22,8 +21,8 @@ contract Pyramid {
     mapping (uint8 => Game) public levels;
     mapping (uint256 => address) usersId;
     mapping (address => User) public registeredUsers;
-    mapping (uint256 => mapping (uint8 => uint256)) public currentUserIndex;
-    mapping (uint256 => mapping (uint8 => mapping (uint256 => User))) pools;
+    mapping (uint8 => uint256) public currentUserIndex;
+    mapping (uint8 => mapping (uint256 => User)) pools;
 
     modifier onlyRegistered {
         require(registeredUsers[msg.sender].userAdsress != address(0));
@@ -31,7 +30,7 @@ contract Pyramid {
     }
 
     modifier onlyOwner {
-        require(msg.sender == contractOwner);
+        require(hasAccess(msg.sender));
         _;
     }
 
@@ -46,11 +45,19 @@ contract Pyramid {
         });
     }
 
+    function hasAccess(address userAdress) public view returns(bool) {
+        return userAdress == contractOwner;
+    }
+
+    function getUserBalance(address userAdsress) public view returns(uint256) {
+        return userAdsress.balance;
+    }
+
     function addGameLevel(uint8 index, uint256 circleCount, uint256 amountToPay, uint256 sendWinnerAmount) public onlyOwner {
         levels[index] = Game({ circleCount: circleCount, amountToPay: amountToPay, sendWinnerAmount: sendWinnerAmount });
     }
 
-    function registerUserToGame(uint256 inviterId) payable public returns(uint256) {
+    function registerUserToGame(uint256 inviterId) payable external returns(uint256) {
         require (msg.value == 1 ether, "For joining in game you need pay 1 ether");
 
         registeredUsers[msg.sender] = User(currentUserIdIndex, payable(msg.sender), inviterId);
@@ -60,17 +67,17 @@ contract Pyramid {
         return currentUserIdIndex - 1;
     }
 
-    function joinToGame(uint8 gameId) payable public onlyRegistered {
+    function joinToGame(uint8 gameId) payable external onlyRegistered {
         require (msg.value == levels[gameId].amountToPay, "Insufficient amount of contribution");
 
-        uint256 index = currentUserIndex[currentGameIndex][gameId];
+        uint256 index = currentUserIndex[gameId];
 
-        pools[currentGameIndex][gameId][index] = registeredUsers[msg.sender];
-        currentUserIndex[currentGameIndex][gameId] += 1;
+        pools[gameId][index] = registeredUsers[msg.sender];
+        currentUserIndex[gameId] += 1;
 
         if (index > levels[gameId].circleCount) {
             uint256 winnerIndex = index - levels[gameId].circleCount;
-            address payable selectedAddress = pools[currentGameIndex][gameId][winnerIndex].userAdsress;
+            address payable selectedAddress = pools[gameId][winnerIndex].userAdsress;
 
             selectedAddress.transfer(levels[gameId].sendWinnerAmount);
         }
