@@ -1,4 +1,4 @@
-import { Login, Main, NavbarComponent } from './Components'
+import { Login, UserAdmin, GamePage, NavbarComponent } from './Components'
 import { useState } from 'react'
 import './App.css'
 
@@ -11,7 +11,8 @@ const App = () => {
             <NavbarComponent account={account} setAccount={setAccount} setPage={setPage} />
             {{
                 login: <Login setAccount={setAccount} setPage={setPage} account={account} />,
-                main: <Main account={account} />
+                admin: <UserAdmin account={account} setPage={setPage} />,
+                games: <GamePage account={account} setPage={setPage} />
             }[page]}
         </div>
     )

@@ -4,6 +4,8 @@ import Web3 from 'web3'
 import Navbar from 'react-bootstrap/Navbar'
 import Container from 'react-bootstrap/Container'
 import Button from 'react-bootstrap/Button'
+import Breadcrumb from 'react-bootstrap/Breadcrumb'
+import Card from 'react-bootstrap/Card'
 
 import { CONTACT_ABI, CONTACT_ADDRESS } from './config'
 
@@ -88,11 +90,11 @@ const Welcome = props => {
                                     console.log(error)
                                     alert(error);
                                 } else {
-                                    props.setPage('main')
+                                    props.setPage('games')
                                 }
                             })
                         } else {
-                            props.setPage('main')
+                            props.setPage('games')
                         }
                     }}>Join to dgames!</Button>
                 </div>
@@ -109,7 +111,7 @@ const Login = props => {
     )
 }
 
-const Main = props => {
+const UserAdmin = props => {
     const [balance, setBalance] = useState()
     const [user, setUser] = useState()
 
@@ -127,6 +129,7 @@ const Main = props => {
 
     return (
         <div>
+            <PagesBreadcrumb setPage={props.setPage} />
             address: {props.account} <br/>
             balance: {balance} <br/>
             user id: {user?.UserId} <br/>
@@ -135,4 +138,70 @@ const Main = props => {
     )
 }
 
-export { Main, Login, NavbarComponent }
+const PagesBreadcrumb = props => {
+    return (
+        <div>
+            <Breadcrumb>
+                <Breadcrumb.Item onClick={() => {props.setPage('admin')}}>Admin</Breadcrumb.Item>
+                <Breadcrumb.Item onClick={() => {props.setPage('games')}}>Games</Breadcrumb.Item>
+            </Breadcrumb>
+        </div>
+    )
+}
+
+const GamePage = props => {
+    const [games, setGames] = useState([])
+
+    useEffect(() => {(async () => {
+        const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545')
+        const contract = new web3.eth.Contract(CONTACT_ABI, CONTACT_ADDRESS)
+        let allGames = []
+
+        for (let index = 0; index < 1; index++) {
+            let level = await contract.methods.levels(index).call()
+            console.log(level)
+            allGames.push(level)
+        }
+        setGames(allGames)
+    })()}, [])
+
+        return (
+            <div>
+                <PagesBreadcrumb setPage={props.setPage} />
+
+                <Container style={{maxWidth: '800px', display: 'flex'}}>
+                    {games.map((game, index) => 
+                        <Card border="info" style={{ width: '18rem', marginRight: '15px' }}>
+                            <Card.Header>{index+1}</Card.Header>
+                            <Card.Body>
+                                <Card.Text>
+                                    Every {game.circleCount} users get {game.sendWinnerAmount /  Math.pow(10, 18)} ether <br/>
+                                    Pay for play: {game.amountToPay /  Math.pow(10, 18)} ether <br/>
+                                </Card.Text>
+                                <Card.Footer>
+                                <Button variant="outline-secondary" onClick={async () => {
+                                    const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545')
+                                    const contract = new web3.eth.Contract(CONTACT_ABI, CONTACT_ADDRESS)
+                                    
+                                    contract.methods.joinToGame(index).send({
+                                        from: props.account,
+                                        gas: 3000000,
+                                        value: web3.utils.toWei(`${(game.amountToPay / Math.pow(10, 18))}`, "ether")
+                                    }, (error, result) => {
+                                        if (error) {
+                                            console.log(error)
+                                            alert(error);
+                                        }
+                                    })
+
+                                }}> Join </Button>
+                                </Card.Footer>
+                            </Card.Body>
+                        </Card>
+                    )}
+                </Container>
+            </div>
+        )
+}
+
+export { UserAdmin, Login, NavbarComponent, GamePage }
