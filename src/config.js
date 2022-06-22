@@ -1,13 +1,8 @@
-export const CONTACT_ADDRESS = '0x75b1eC80C8a3cF4ab31903FabA5FBf455930DC8e'
+export const CONTACT_ADDRESS = '0x683ef34F78FC34C3345F218628D8D85DFD217de6'
 
 export const CONTACT_ABI = [
 	{
 		"inputs": [
-			{
-				"internalType": "uint8",
-				"name": "index",
-				"type": "uint8"
-			},
 			{
 				"internalType": "uint256",
 				"name": "circleCount",
@@ -65,6 +60,85 @@ export const CONTACT_ABI = [
 		"inputs": [],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "circleCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amountToPay",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "sendWinnerAmount",
+						"type": "uint256"
+					}
+				],
+				"indexed": false,
+				"internalType": "struct Pyramid.Game",
+				"name": "game",
+				"type": "tuple"
+			}
+		],
+		"name": "NewGame",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "circleCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amountToPay",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "sendWinnerAmount",
+						"type": "uint256"
+					}
+				],
+				"indexed": false,
+				"internalType": "struct Pyramid.Game",
+				"name": "game",
+				"type": "tuple"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "winner",
+				"type": "address"
+			}
+		],
+		"name": "WinnerPayment",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "currentGameIdIndex",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [

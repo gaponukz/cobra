@@ -155,11 +155,12 @@ const GamePage = props => {
     useEffect(() => {(async () => {
         const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545')
         const contract = new web3.eth.Contract(CONTACT_ABI, CONTACT_ADDRESS)
+        const currentGameIdIndex = await contract.methods.currentGameIdIndex().call()
+
         let allGames = []
 
-        for (let index = 0; index < 1; index++) {
+        for (let index = 0; index < currentGameIdIndex; index++) {
             let level = await contract.methods.levels(index).call()
-            console.log(level)
             allGames.push(level)
         }
         setGames(allGames)
@@ -175,8 +176,8 @@ const GamePage = props => {
                             <Card.Header>{index+1}</Card.Header>
                             <Card.Body>
                                 <Card.Text>
-                                    Every {game.circleCount} users get {game.sendWinnerAmount /  Math.pow(10, 18)} ether <br/>
-                                    Pay for play: {game.amountToPay /  Math.pow(10, 18)} ether <br/>
+                                    Every {game.circleCount} users get {`${game.sendWinnerAmount /  Math.pow(10, 18)}`.replace('e-18', '')} ether <br/>
+                                    Pay for play: {`${game.amountToPay /  Math.pow(10, 18)}`.replace('e-18', '')}  ether <br/>
                                 </Card.Text>
                                 <Card.Footer>
                                 <Button variant="outline-secondary" onClick={async () => {
@@ -186,7 +187,7 @@ const GamePage = props => {
                                     contract.methods.joinToGame(index).send({
                                         from: props.account,
                                         gas: 3000000,
-                                        value: web3.utils.toWei(`${(game.amountToPay / Math.pow(10, 18))}`, "ether")
+                                        value: web3.utils.toWei(`${(game.amountToPay / Math.pow(10, 18))}`.replace('e-18', ''), "ether")
                                     }, (error, result) => {
                                         if (error) {
                                             console.log(error)

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 contract Pyramid {
     uint256 currentUserIdIndex;
+    uint8 public currentGameIdIndex;
     address contractOwner;
 
     struct User {
@@ -24,6 +25,9 @@ contract Pyramid {
     mapping (uint8 => uint256) public currentUserIndex;
     mapping (uint8 => mapping (uint256 => User)) pools;
 
+    event NewGame(Game game);
+    event WinnerPayment(Game game, address winner);
+
     modifier onlyRegistered {
         require(registeredUsers[msg.sender].userAdsress != address(0));
         _;
@@ -36,9 +40,7 @@ contract Pyramid {
 
     constructor () {
         contractOwner = msg.sender;
-        
         addGameLevel({ 
-            index: 0, 
             circleCount: 3, 
             amountToPay: 1 ether, 
             sendWinnerAmount: 1.5 ether 
@@ -53,12 +55,14 @@ contract Pyramid {
         return userAdsress.balance;
     }
 
-    function addGameLevel(uint8 index, uint256 circleCount, uint256 amountToPay, uint256 sendWinnerAmount) public onlyOwner {
-        levels[index] = Game({ circleCount: circleCount, amountToPay: amountToPay, sendWinnerAmount: sendWinnerAmount });
+    function addGameLevel(uint256 circleCount, uint256 amountToPay, uint256 sendWinnerAmount) public onlyOwner {
+        levels[currentGameIdIndex] = Game({ circleCount: circleCount, amountToPay: amountToPay, sendWinnerAmount: sendWinnerAmount });
+        emit NewGame(levels[currentGameIdIndex]);
+        currentGameIdIndex += 1;
     }
 
     function registerUserToGame(uint256 inviterId) payable external returns(uint256) {
-        require (msg.value == 1 ether, "For joining in game you need pay 1 ether");
+        require (msg.value == 1 ether, "For regiter in game you need pay 1 ether");
 
         registeredUsers[msg.sender] = User(currentUserIdIndex, payable(msg.sender), inviterId);
         usersId[currentUserIdIndex] = msg.sender;
@@ -80,6 +84,7 @@ contract Pyramid {
             address payable selectedAddress = pools[gameId][winnerIndex].userAdsress;
 
             selectedAddress.transfer(levels[gameId].sendWinnerAmount);
+            emit WinnerPayment(levels[gameId], selectedAddress);
         }
 
         // TODO: referal system
