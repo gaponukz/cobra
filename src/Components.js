@@ -132,7 +132,7 @@ const UserAdmin = props => {
             <PagesBreadcrumb setPage={props.setPage} />
             address: {props.account} <br/>
             balance: {balance} <br/>
-            user id: {user?.UserId} <br/>
+            ref url: http://localhost:3000/?id={user?.UserId} <br/>
             invited by: {user?.invitedId} <br/>
         </div>
     )
